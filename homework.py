@@ -136,13 +136,12 @@ def parse_status(homework):
 
 def main():
     """Основная логика работы бота."""
-    bot = telegram.Bot(token=TELEGRAM_TOKEN)
-    current_timestamp = int(time.time())
-    error_message = ''
-    homework_status_message = ''
     if not check_tokens():
         message = 'Бот остановлен! Проверь корректность токенов.'
         sys.exit(message)
+    bot = telegram.Bot(token=TELEGRAM_TOKEN)
+    current_timestamp = int(time.time())
+    info_message = ''
     while True:
         try:
             response = get_api_answer(current_timestamp)
@@ -152,9 +151,9 @@ def main():
                 logger.info('Список домашнего задания пуст')
                 continue
             status_homework = parse_status(homeworks[0])
-            if status_homework != homework_status_message:
-                homework_status_message = status_homework
-                send_message(bot, homework_status_message)
+            if status_homework != info_message:
+                info_message = status_homework
+                send_message(bot, info_message)
             else:
                 logger.debug(
                     'Статус проверки домашнего задания не обновлялся'
@@ -164,8 +163,8 @@ def main():
             )
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
-            if message not in error_message:
-                error_message = message
+            if message != info_message:
+                info_message = message
                 logger.error(message)
                 send_message(bot, message)
         finally:
